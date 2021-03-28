@@ -16,7 +16,8 @@
 
 /* Variaveis globais */
 int time;
-int tarefas = 0;
+int tarefas;
+int numusers;
 
 /* Estrutura */
 typedef struct{
@@ -30,7 +31,9 @@ typedef struct{
 
 /* prototipos*/
 
-void comando_t(Tarefa dis[]);
+int comando_t(Tarefa dis[]);
+int comando_n();
+int comando_u();
 
 
 
@@ -47,8 +50,10 @@ int main(){
         else if(comando == 'l'){
         }
         else if(comando == 'n'){
+            comando_n();
         }
         else if(comando == 'u'){
+            comando_u();
         }
         else if(comando == 'm'){
         }
@@ -62,24 +67,98 @@ int main(){
     return 0;
 }
 
-void comando_t(Tarefa ids[]){
+/* funcoes dos comandos */
+
+int comando_t(Tarefa ids[]){
     int duracao, i;
-    char descricao[MAXDESC];
+    char descricao[MAXDESC], c;
     
-    scanf("%d %s", &duracao, descricao);
-    
-    for(i=0; i < tarefas-1; i++){
+    scanf("%d", &duracao);
+    for(i = 0; (c = getchar()) != '\n' && c != EOF; i++ )
+        descricao[i] = c;
+    descricao[i] = '\0';
+
+    for(i=0; i < tarefas; i++){
         if (strcmp(descricao, ids[i].desc) == 0){
-            printf("duplicate description");
-            break;}
+            printf("duplicate description\n");
+            return 0;
+            }
     }
-    if (tarefas == MAXTAREFAS)
-        printf("too many tasks");
+    if (tarefas == MAXTAREFAS){
+        printf("too many tasks\n");
+        return 0;
+    }
 
     else{
         ids[tarefas].dur = duracao;
         strcpy(ids[tarefas].desc, descricao);
         tarefas++;
         printf("task %d\n", tarefas);
+        return 0;
     }
 }
+
+int comando_n(){
+    float duracao;
+    int aux;
+
+    scanf("%f", &duracao);
+    aux = duracao;
+
+    if(duracao < 0 || (duracao != aux)){
+        printf("invalid time\n");
+        return 0;
+    }
+    
+    else{
+    time += duracao;
+    printf("%d\n", time);
+    return 0;
+    }
+}
+
+int comando_u(){
+    char utilizadores[MAXUT][MAXSTR], str[MAXSTR], fim[] = "\n";
+    int i, escreve = 0, comp;
+
+    scanf("%s", str);
+    comp = strlen(str);
+
+    if(strcmp(str,fim) == 0){
+        for(i=0; i < numusers; i++){
+            printf("%s\n", utilizadores[i]);
+        }
+        return 0;
+    }
+
+    for(i=0; i < comp; i++){
+        if(str[i] != ' ' && str[i] != '\t')
+            escreve = 1;
+    }
+
+    if(escreve == 1){
+        for(i=0; i < numusers; i++){
+            if(strcmp(utilizadores[i],str) == 0){
+                printf("user already exists\n");
+                return 0;
+            }
+        }
+
+        if(numusers == MAXUT){
+            printf("too many users\n");
+            return 0;
+        }
+
+        else{
+            for(i=0; i < comp; i++){
+                utilizadores[numusers][i] = str[i];
+            }
+            utilizadores[numusers][i] = '\0';
+            numusers++;
+            return 0;
+        }
+    }
+    return 0;
+}
+
+/* Funcoes auxiliares */
