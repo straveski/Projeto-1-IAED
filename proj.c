@@ -33,7 +33,8 @@ typedef struct{
 
 /* prototipos*/
 
-int comando_t(Tarefa dis[]);
+int comando_t(Tarefa ids[]);
+int comando_l(Tarefa ids[]);
 int comando_n();
 int comando_u();
 int comando_a();
@@ -51,6 +52,7 @@ int main(){
             comando_t(ids);
         }
         else if(comando == 'l'){
+            comando_l(ids);
         }
         else if(comando == 'n'){
             comando_n();
@@ -203,6 +205,42 @@ int comando_a(){
         strcpy(ativ[atividades], str);
         puts(ativ[atividades]);
         atividades++;
+        return 0;
+    }
+}
+
+int comando_l(Tarefa ids[]){
+    int idinput[MAXTAREFAS] = {0}, quantidade_ids = 0, i = 0, t;
+    char c;
+
+    while((c= getchar()) != '\n'){
+        if (c != ' ')
+            idinput[i] = idinput[i]*10 + c - '0';
+        else
+            i++; 
+    }
+    printf("%d", idinput[0]);
+    printf("%d", idinput[1]);
+
+    for(i = 0; idinput[i] != 0; i++)
+        quantidade_ids++;
+    
+    if (quantidade_ids == 0){
+        printf("alfabeticamente\n");
+        return 0;
+    }
+    
+    else{
+        for(i=0; i < quantidade_ids; i++){
+            if (idinput[i] > tarefas){
+                printf("%d: no such task\n", idinput[i]);
+                return 0;
+            }
+        }
+        for(i=0; i < quantidade_ids; i++){
+            t = idinput[i];
+            printf("%d %s #%d %s", t, ids[t-1].ativ, ids[t-1].dur, ids[t-1].desc);
+        }
         return 0;
     }
 }
