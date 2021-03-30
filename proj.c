@@ -39,6 +39,7 @@ int comando_n();
 int comando_u();
 int comando_a();
 void el_espacos_inicio(char str[], int size);
+void ordena_alfabet(Tarefa ids[]);
 
 
 /* main fuction */
@@ -97,6 +98,7 @@ int comando_t(Tarefa ids[]){
 
     else{
         ids[tarefas].dur = duracao;
+        strcpy(ids[tarefas].ativ, ativ[0]);
         strcpy(ids[tarefas].desc, descricao);
         tarefas++;
         printf("task %d\n", tarefas);
@@ -210,23 +212,27 @@ int comando_a(){
 }
 
 int comando_l(Tarefa ids[]){
-    int idinput[MAXTAREFAS] = {0}, quantidade_ids = 0, i = 0, t;
+    int idinput[MAXTAREFAS] = {0}, quantidade_ids = 0, i = 0, t, flag = 0;
     char c;
 
-    while((c= getchar()) != '\n'){
-        if (c != ' ')
-            idinput[i] = idinput[i]*10 + c - '0';
-        else
-            i++; 
+    while(( c = getchar()) != '\n'){
+        if (flag == 1){
+            if (c != ' ')
+                idinput[i] = (idinput[i]*10) + (c - '0');
+            else
+                i++; 
+        }
+        else if(c >= '1' && c <= '9'){
+            flag = 1;
+            idinput[0] += c - '0'; 
+        }
     }
-    printf("%d", idinput[0]);
-    printf("%d", idinput[1]);
 
     for(i = 0; idinput[i] != 0; i++)
         quantidade_ids++;
     
     if (quantidade_ids == 0){
-        printf("alfabeticamente\n");
+        ordena_alfabet(ids);
         return 0;
     }
     
@@ -239,7 +245,7 @@ int comando_l(Tarefa ids[]){
         }
         for(i=0; i < quantidade_ids; i++){
             t = idinput[i];
-            printf("%d %s #%d %s", t, ids[t-1].ativ, ids[t-1].dur, ids[t-1].desc);
+            printf("%d %s #%d %s\n", t, ids[t-1].ativ, ids[t-1].dur, ids[t-1].desc);
         }
         return 0;
     }
@@ -259,7 +265,33 @@ void el_espacos_inicio(char str[], int size){
     str[i2] = '\0';
 }
 
+void ordena_alfabet(Tarefa ids[]){
+    char v1[MAXTAREFAS][MAXDESC], aux[MAXDESC]; 
+    int i, k, v2[MAXTAREFAS], aux2;
 
+    for(i=0; i<tarefas;i++)
+        v2[i] = i+1;
+
+    for(i=0; i<tarefas; i++){
+        strcpy(v1[i], ids[i].desc);
+    }
+
+    for(i=0; i < tarefas; i++){
+        for(k = i+1; k< tarefas;k++){
+            if(strcmp(v1[i],v1[k]) > 0){
+                strcpy(aux,v1[k]);
+                strcpy(v1[k], v1[i]);
+                strcpy(v1[i], aux);
+                aux2 = v2[k];
+                v2[k] = v2[i];
+                v2[i] = aux2;
+            }
+        }
+    }
+
+    for(i=0; i < tarefas; i++)
+        printf("%d %s #%d %s\n",v2[i], ids[v2[i]-1].ativ, ids[v2[i]-1].dur, v1[i]);
+}
 
 
 
