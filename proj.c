@@ -20,11 +20,12 @@ int tarefas;
 int numusers;
 int atividades = 3;
 char ativ[MAXATIV][MAXSTR] = {"TO DO","IN PROGRESS", "DONE"};
+char utilizadores[MAXUT][MAXSTR];
 
 /* Estrutura */
 typedef struct{
     char desc[MAXDESC];  /*descricao*/
-    char ativ[MAXATIV];  /*atividade*/
+    char ativ[MAXSTR];  /*atividade*/
     int dur;     /*duracao da tarefa*/
     int timeexec;        /*tempo em que saiu da tarefa inicial*/
 } Tarefa;
@@ -38,6 +39,7 @@ int comando_l(Tarefa ids[]);
 int comando_n();
 int comando_u();
 int comando_a();
+int comando_m(Tarefa ids[]);
 void el_espacos_inicio(char str[], int size);
 void ordena_alfabet(Tarefa ids[]);
 
@@ -62,6 +64,7 @@ int main(){
             comando_u();
         }
         else if(comando == 'm'){
+            comando_m(ids);
         }
         else if(comando == 'd'){
         }
@@ -77,13 +80,15 @@ int main(){
 /* funcoes dos comandos */
 
 int comando_t(Tarefa ids[]){
-    int duracao, i;
+    int duracao, i, size;
     char descricao[MAXDESC], c;
     
     scanf("%d", &duracao);
     for(i = 0; (c = getchar()) != '\n' && c != EOF; i++ )
         descricao[i] = c;
     descricao[i] = '\0';
+    size = strlen(descricao);
+    el_espacos_inicio(descricao, size);
 
     for(i=0; i < tarefas; i++){
         if (strcmp(descricao, ids[i].desc) == 0){
@@ -126,7 +131,7 @@ int comando_n(){
 }
 
 int comando_u(){
-    char utilizadores[MAXUT][MAXSTR], str[MAXSTR], c;
+    char str[MAXSTR], c;
     int i, comp;
 
     for(i=0 ;(c = getchar()) != '\n';){
@@ -205,7 +210,6 @@ int comando_a(){
 
     else{
         strcpy(ativ[atividades], str);
-        puts(ativ[atividades]);
         atividades++;
         return 0;
     }
@@ -250,6 +254,53 @@ int comando_l(Tarefa ids[]){
         return 0;
     }
 }
+
+int comando_m(Tarefa ids[]){
+    int i, id, flag = 0, gasto, slack;
+    char atividade[MAXSTR], utilizador[MAXSTR];
+    scanf("%d %s %[^\n]", &id, utilizador, atividade);
+
+    /*erros*/
+    if(id > tarefas){
+        printf("no such task\n");
+        return 0;
+    }
+    if(strcmp(atividade,ativ[0]) == 0){
+        printf("task already started\n");
+        return 0;
+    }
+    for(i=0; i < numusers; i++){
+        if(strcmp(utilizador, utilizadores[i]) == 0)
+            flag = 1;
+    }
+    if(flag==0){
+        printf("no such user\n");
+        return 0;
+    }
+    for(i=0; i<atividades; i++){
+        if(strcmp(atividade, ativ[i]) == 0)
+            flag = 0;
+    }
+
+    if (flag == 1){
+        printf("no such activity\n");
+        return 0;
+    }
+    /* comando correto*/
+    if(strcmp(atividade, ativ[2]) == 0){
+        gasto = ids[id-1].timeexec - time;
+        slack = gasto - ids[id-1].dur;
+        printf("duration=%d slack=%d\n", gasto, slack);
+        return 0;
+    }
+
+    else{
+        strcpy(ids[id-1].ativ, atividade);
+        ids[id-1].timeexec = time;
+        return 0;
+    }
+}
+
 /* Funcoes auxiliares */
 
 void el_espacos_inicio(char str[], int size){
@@ -267,7 +318,7 @@ void el_espacos_inicio(char str[], int size){
 
 void ordena_alfabet(Tarefa ids[]){
     char v1[MAXTAREFAS][MAXDESC], aux[MAXDESC]; 
-    int i, k, v2[MAXTAREFAS], aux2;
+    int i, k, v2[MAXTAREFAS] = {0}, aux2;
 
     for(i=0; i<tarefas;i++)
         v2[i] = i+1;
@@ -292,28 +343,3 @@ void ordena_alfabet(Tarefa ids[]){
     for(i=0; i < tarefas; i++)
         printf("%d %s #%d %s\n",v2[i], ids[v2[i]-1].ativ, ids[v2[i]-1].dur, v1[i]);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
