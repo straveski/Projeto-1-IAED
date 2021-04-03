@@ -30,8 +30,6 @@ typedef struct{
     int timeexec;        /*tempo em que saiu da tarefa inicial*/
 } Tarefa;
 
-
-
 /* prototipos*/
 
 int comando_t(Tarefa ids[]);
@@ -40,9 +38,10 @@ int comando_n();
 int comando_u();
 int comando_a();
 int comando_m(Tarefa ids[]);
+int comando_d(Tarefa ids[]);
 void el_espacos_inicio(char str[], int size);
 void ordena_alfabet(Tarefa ids[]);
-
+void ordena(int vec[],Tarefa ids[], int size);
 
 /* main fuction */
 
@@ -67,11 +66,11 @@ int main(){
             comando_m(ids);
         }
         else if(comando == 'd'){
+            comando_d(ids);
         }
         else if(comando == 'a'){
             comando_a();
         }
-
     } while(comando != 'q');
 
     return 0;
@@ -103,6 +102,7 @@ int comando_t(Tarefa ids[]){
 
     else{
         ids[tarefas].dur = duracao;
+        ids[tarefas].timeexec = 0;
         strcpy(ids[tarefas].ativ, ativ[0]);
         strcpy(ids[tarefas].desc, descricao);
         tarefas++;
@@ -301,6 +301,35 @@ int comando_m(Tarefa ids[]){
     }
 }
 
+int comando_d(Tarefa ids[]){
+    int i,j=0, flag = 0, compaux, ids_ativ[MAXTAREFAS];
+    char atividade[MAXSTR];
+    scanf("%[^\n]", atividade);
+    compaux = strlen(atividade);
+    el_espacos_inicio(atividade, compaux);
+
+    /*         erro       */
+    for(i = 0; i < atividades; i++){
+        if(strcmp(atividade, ativ[i]) == 0)
+            flag = 1;
+    }
+    if (flag == 0){
+        printf("no such activity");
+        return 0;
+    }
+    /* funcao */
+    /*Este ciclo vai percorrer todos os ids das tarefas e vai verificar quais tem a mesma ativiadade
+    que a atividade dada como input, copiando esses ids para um vetor que vai seguidamente ser ordenado*/
+    for(i = 0; i < tarefas; i++){
+        if(strcmp(ids[i].ativ,atividade) == 0){
+            ids_ativ[j] = i+1;
+            j++;
+        }
+    }
+
+    ordena(ids_ativ, ids, j);
+    return 0;
+}
 /* Funcoes auxiliares */
 
 void el_espacos_inicio(char str[], int size){
@@ -328,7 +357,7 @@ void ordena_alfabet(Tarefa ids[]){
     }
 
     for(i=0; i < tarefas; i++){
-        for(k = i+1; k< tarefas;k++){
+        for(k = i+1; k < tarefas;k++){
             if(strcmp(v1[i],v1[k]) > 0){
                 strcpy(aux,v1[k]);
                 strcpy(v1[k], v1[i]);
@@ -342,4 +371,31 @@ void ordena_alfabet(Tarefa ids[]){
 
     for(i=0; i < tarefas; i++)
         printf("%d %s #%d %s\n",v2[i], ids[v2[i]-1].ativ, ids[v2[i]-1].dur, v1[i]);
+}
+
+void ordena(int vec[], Tarefa ids[], int size){
+    int i, j, aux, fim = size;
+    /* este ciclo vai ordenar os ids em relacao ao instante de inico atraves de um bubble sort e se 
+    dois ids tiverem o mesmo instante de inico, vai ordena-los em relacao a descricao*/
+    for(i=0; i < fim; i++){
+        for(j= i+1; j < fim; j++){
+            if(ids[vec[i]].timeexec > ids[vec[j]].timeexec){
+                aux = vec[j];
+                vec[j] = vec[i];
+                vec[i] = aux;
+            }
+            else if(ids[vec[i]].timeexec == ids[vec[j]].timeexec){
+                if(strcmp(ids[vec[i]].desc,ids[vec[j]].desc) > 0){
+                    aux = vec[j];
+                    vec[j] = vec[i];
+                    vec[i] = aux;
+                }
+            }
+        }
+    }
+    for(i=0; i < size; i++)
+        printf("%d\n", vec[i]);
+
+    for(i=0; i < size; i++)
+        printf("%d %d %s\n", vec[i], ids[vec[i]-1].timeexec, ids[vec[i]-1].desc);
 }
