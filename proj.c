@@ -288,15 +288,24 @@ int comando_m(Tarefa ids[]){
     }
     /* comando correto*/
     if(strcmp(atividade, ativ[2]) == 0){
-        gasto = ids[id-1].timeexec - time;
+        if(strcmp(ids[id-1].ativ,ativ[0])==0)
+            gasto = 0;
+        else
+            gasto = time - ids[id-1].timeexec;
+            
         slack = gasto - ids[id-1].dur;
+        strcpy(ids[id-1].ativ, atividade);
         printf("duration=%d slack=%d\n", gasto, slack);
         return 0;
     }
-
-    else{
+        
+    else if(ids[id-1].timeexec == 0){
         strcpy(ids[id-1].ativ, atividade);
         ids[id-1].timeexec = time;
+        return 0;
+    }
+    else{
+        strcpy(ids[id-1].ativ, atividade);
         return 0;
     }
 }
@@ -379,13 +388,13 @@ void ordena(int vec[], Tarefa ids[], int size){
     dois ids tiverem o mesmo instante de inico, vai ordena-los em relacao a descricao*/
     for(i=0; i < fim; i++){
         for(j= i+1; j < fim; j++){
-            if(ids[vec[i]].timeexec > ids[vec[j]].timeexec){
+            if(ids[vec[i]-1].timeexec > ids[vec[j]-1].timeexec){
                 aux = vec[j];
                 vec[j] = vec[i];
                 vec[i] = aux;
             }
-            else if(ids[vec[i]].timeexec == ids[vec[j]].timeexec){
-                if(strcmp(ids[vec[i]].desc,ids[vec[j]].desc) > 0){
+            else if(ids[vec[i]-1].timeexec == ids[vec[j]-1].timeexec){
+                if(strcmp(ids[vec[i]-1].desc,ids[vec[j]-1].desc) > 0){
                     aux = vec[j];
                     vec[j] = vec[i];
                     vec[i] = aux;
@@ -393,8 +402,6 @@ void ordena(int vec[], Tarefa ids[], int size){
             }
         }
     }
-    for(i=0; i < size; i++)
-        printf("%d\n", vec[i]);
 
     for(i=0; i < size; i++)
         printf("%d %d %s\n", vec[i], ids[vec[i]-1].timeexec, ids[vec[i]-1].desc);
