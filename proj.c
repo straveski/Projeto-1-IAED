@@ -8,8 +8,8 @@
 #include <string.h>
 
 /* Constantes */
-#define MAXDESC 50
-#define MAXSTR 20
+#define MAXDESC 51
+#define MAXSTR 21
 #define MAXTAREFAS 10000
 #define MAXATIV 10
 #define MAXUT 50
@@ -89,6 +89,7 @@ int comando_t(Tarefa ids[]){
     size = strlen(descricao);
     el_espacos_inicio(descricao, size);
 
+
     for(i=0; i < tarefas; i++){
         if (strcmp(descricao, ids[i].desc) == 0){
             printf("duplicate description\n");
@@ -97,6 +98,11 @@ int comando_t(Tarefa ids[]){
     }
     if (tarefas == MAXTAREFAS){
         printf("too many tasks\n");
+        return 0;
+    }
+
+    if(duracao <= 0){
+        printf("invalid duration\n");
         return 0;
     }
 
@@ -203,7 +209,7 @@ int comando_a(){
         }
     }
 
-    if(atividades+1 >= MAXATIV){
+    if(atividades+1 > MAXATIV){
         printf("too many activities\n");
         return 0;
     }
@@ -223,15 +229,17 @@ int comando_l(Tarefa ids[]){
         if (flag == 1){
             if (c != ' ')
                 idinput[i] = (idinput[i]*10) + (c - '0');
-            else
-                i++; 
+            else{
+                i++;
+                flag = 0;
+            }
         }
         else if(c >= '1' && c <= '9'){
             flag = 1;
-            idinput[0] += c - '0'; 
+            idinput[i] += c - '0'; 
         }
     }
-
+    /*tamanho do array de ids */
     for(i = 0; idinput[i] != 0; i++)
         quantidade_ids++;
     
@@ -240,16 +248,14 @@ int comando_l(Tarefa ids[]){
         return 0;
     }
     
-    else{
+    else{ 
         for(i=0; i < quantidade_ids; i++){
-            if (idinput[i] > tarefas){
+            if (idinput[i] > tarefas)
                 printf("%d: no such task\n", idinput[i]);
-                return 0;
-            }
-        }
-        for(i=0; i < quantidade_ids; i++){
+            else{
             t = idinput[i];
             printf("%d %s #%d %s\n", t, ids[t-1].ativ, ids[t-1].dur, ids[t-1].desc);
+            }
         }
         return 0;
     }
@@ -261,7 +267,7 @@ int comando_m(Tarefa ids[]){
     scanf("%d %s %[^\n]", &id, utilizador, atividade);
 
     /*erros*/
-    if(id > tarefas){
+    if(id > tarefas || id <= 0){
         printf("no such task\n");
         return 0;
     }
@@ -318,12 +324,13 @@ int comando_d(Tarefa ids[]){
     el_espacos_inicio(atividade, compaux);
 
     /*         erro       */
+
     for(i = 0; i < atividades; i++){
         if(strcmp(atividade, ativ[i]) == 0)
             flag = 1;
     }
     if (flag == 0){
-        printf("no such activity");
+        printf("no such activity\n");
         return 0;
     }
     /* funcao */
