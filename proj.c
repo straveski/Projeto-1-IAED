@@ -25,7 +25,7 @@ char utilizadores[MAXUT][MAXSTR];
 /* Estrutura */
 typedef struct{
     char desc[MAXDESC];  /*descricao*/
-    char ativ[MAXSTR];  /*atividade*/
+    char atv[MAXSTR];  /*atividade*/
     int dur;     /*duracao da tarefa*/
     int timeexec;        /*tempo em que saiu da tarefa inicial*/
 } Tarefa;
@@ -75,7 +75,6 @@ int main(){
 
     return 0;
 }
-
 /* funcoes dos comandos */
 
 int comando_t(Tarefa ids[]){
@@ -109,7 +108,7 @@ int comando_t(Tarefa ids[]){
     else{
         ids[tarefas].dur = duracao;
         ids[tarefas].timeexec = 0;
-        strcpy(ids[tarefas].ativ, ativ[0]);
+        strcpy(ids[tarefas].atv, ativ[0]);
         strcpy(ids[tarefas].desc, descricao);
         tarefas++;
         printf("task %d\n", tarefas);
@@ -137,19 +136,18 @@ int comando_n(){
 }
 
 int comando_u(){
-    char str[MAXSTR], c;
-    int i, comp;
+    char strnome[MAXSTR], c;
+    int i;
 
     for(i=0 ;(c = getchar()) != '\n';){
         if(c != ' '){
-            str[i] = c;
+            strnome[i] = c;
             i++;
         }
     }
-    str[i] = '\0';
-    comp = strlen(str);
+    strnome[i] = '\0';
 
-    if(str[0] == '\0'){
+    if(strnome[0] == '\0'){
         for(i=0; i < numusers; i++){
             printf("%s\n", utilizadores[i]);
         }
@@ -158,7 +156,7 @@ int comando_u(){
 
     else{
         for(i=0; i < numusers; i++){
-            if(strcmp(utilizadores[i],str) == 0){
+            if(strcmp(utilizadores[i],strnome) == 0){
                 printf("user already exists\n");
                 return 0;
             }
@@ -170,10 +168,7 @@ int comando_u(){
         }
 
         else{
-            for(i=0; i < comp; i++){
-                utilizadores[numusers][i] = str[i];
-            }
-            utilizadores[numusers][i] = '\0';
+            strcpy(utilizadores[numusers], strnome);
             numusers++;
             return 0;
         }
@@ -182,40 +177,45 @@ int comando_u(){
 }
 
 int comando_a(){
-    char str[MAXSTR];
     int i, compaux, comp;
-    scanf("%[^\n]", str);
-    compaux = strlen(str);
-    el_espacos_inicio(str, compaux);
-    comp = strlen(str);
-
-    if(str[0] == '\0'){
+    char string[MAXSTR],c;
+    /*le o input */
+    for(i=0; (c=getchar()) != '\n';i++){
+        string[i] = c;
+    }
+    string[i]= '\0';
+    /*tamanho e retira o espaco do inicio */
+    compaux = strlen(string);
+    el_espacos_inicio(string, compaux);
+    comp = strlen(string);
+    /*caso do input sem atividade */
+    if(string[0] == '\0'){
         for(i=0; i < atividades; i++)
             puts(ativ[i]);
         return 0;
     }
 
-    for(i=0; i<comp; i++){
-        if (str[i] >= 'a' && str[i] <= 'z'){
-            printf("invalid description\n");
-            return 0;
-        }
-    }
-
     for(i=0; i < atividades; i++){
-        if(strcmp(ativ[i],str) == 0){
+        if(strcmp(ativ[i],string) == 0){
             printf("duplicate activity\n");
             return 0;
         }
     }
-
+    /*erro 1*/
+    for(i=0; i<comp; i++){
+        if (string[i] >= 'a' && string[i] <= 'z'){
+            printf("invalid description\n");
+            return 0;
+        }
+    }
+    /*erro 2*/
     if(atividades+1 > MAXATIV){
         printf("too many activities\n");
         return 0;
     }
-
+    /*adiciona a nova atividade*/
     else{
-        strcpy(ativ[atividades], str);
+        strcpy(ativ[atividades], string);
         atividades++;
         return 0;
     }
@@ -235,8 +235,17 @@ int comando_l(Tarefa ids[]){
             }
         }
         else if(c >= '1' && c <= '9'){
-            flag = 1;
-            idinput[i] += c - '0'; 
+            if (flag == -1){
+                idinput[i] += (c - '0')*flag;
+                flag = 1; 
+            }
+            else{
+                flag = 1;
+                idinput[i] += c - '0'; 
+            }
+        }
+        else if(c == '-'){
+            flag = -1;
         }
     }
     /*tamanho do array de ids */
@@ -250,11 +259,11 @@ int comando_l(Tarefa ids[]){
     
     else{ 
         for(i=0; i < quantidade_ids; i++){
-            if (idinput[i] > tarefas)
+            if (idinput[i] > tarefas || idinput[i] <= 0)
                 printf("%d: no such task\n", idinput[i]);
             else{
             t = idinput[i];
-            printf("%d %s #%d %s\n", t, ids[t-1].ativ, ids[t-1].dur, ids[t-1].desc);
+            printf("%d %s #%d %s\n", t, ids[t-1].atv, ids[t-1].dur, ids[t-1].desc);
             }
         }
         return 0;
@@ -272,8 +281,10 @@ int comando_m(Tarefa ids[]){
         return 0;
     }
     if(strcmp(atividade,ativ[0]) == 0){
-        printf("task already started\n");
-        return 0;
+        if(strcmp(ids[id-1].atv, ativ[0]) != 0){
+            printf("task already started\n");
+            return 0;
+        }
     }
     for(i=0; i < numusers; i++){
         if(strcmp(utilizador, utilizadores[i]) == 0)
@@ -294,32 +305,34 @@ int comando_m(Tarefa ids[]){
     }
     /* comando correto*/
     if(strcmp(atividade, ativ[2]) == 0){
-        if(strcmp(ids[id-1].ativ,ativ[0])==0)
+        if(strcmp(ids[id-1].atv,ativ[0])==0)
             gasto = 0;
         else
             gasto = time - ids[id-1].timeexec;
-            
         slack = gasto - ids[id-1].dur;
-        strcpy(ids[id-1].ativ, atividade);
+        strcpy(ids[id-1].atv, atividade);
         printf("duration=%d slack=%d\n", gasto, slack);
         return 0;
     }
         
     else if(ids[id-1].timeexec == 0){
-        strcpy(ids[id-1].ativ, atividade);
+        strcpy(ids[id-1].atv, atividade);
         ids[id-1].timeexec = time;
         return 0;
     }
     else{
-        strcpy(ids[id-1].ativ, atividade);
+        strcpy(ids[id-1].atv, atividade);
         return 0;
     }
 }
 
 int comando_d(Tarefa ids[]){
     int i,j=0, flag = 0, compaux, ids_ativ[MAXTAREFAS];
-    char atividade[MAXSTR];
-    scanf("%[^\n]", atividade);
+    char atividade[MAXSTR],c;
+    for(i=0;(c=getchar()) != '\n';i++){
+        atividade[i] = c;
+    }
+    atividade[i] = '\0';
     compaux = strlen(atividade);
     el_espacos_inicio(atividade, compaux);
 
@@ -337,7 +350,7 @@ int comando_d(Tarefa ids[]){
     /*Este ciclo vai percorrer todos os ids das tarefas e vai verificar quais tem a mesma ativiadade
     que a atividade dada como input, copiando esses ids para um vetor que vai seguidamente ser ordenado*/
     for(i = 0; i < tarefas; i++){
-        if(strcmp(ids[i].ativ,atividade) == 0){
+        if(strcmp(ids[i].atv,atividade) == 0){
             ids_ativ[j] = i+1;
             j++;
         }
@@ -361,32 +374,23 @@ void el_espacos_inicio(char str[], int size){
     str[i2] = '\0';
 }
 
-void ordena_alfabet(Tarefa ids[]){
-    char v1[MAXTAREFAS][MAXDESC], aux[MAXDESC]; 
+void ordena_alfabet(Tarefa ids[]){ 
     int i, k, v2[MAXTAREFAS] = {0}, aux2;
 
     for(i=0; i<tarefas;i++)
         v2[i] = i+1;
 
-    for(i=0; i<tarefas; i++){
-        strcpy(v1[i], ids[i].desc);
-    }
-
     for(i=0; i < tarefas; i++){
         for(k = i+1; k < tarefas;k++){
-            if(strcmp(v1[i],v1[k]) > 0){
-                strcpy(aux,v1[k]);
-                strcpy(v1[k], v1[i]);
-                strcpy(v1[i], aux);
+            if(strcmp(ids[v2[i]-1].desc,ids[v2[k]-1].desc) > 0){
                 aux2 = v2[k];
                 v2[k] = v2[i];
                 v2[i] = aux2;
             }
         }
     }
-
     for(i=0; i < tarefas; i++)
-        printf("%d %s #%d %s\n",v2[i], ids[v2[i]-1].ativ, ids[v2[i]-1].dur, v1[i]);
+        printf("%d %s #%d %s\n",v2[i], ids[v2[i]-1].atv, ids[v2[i]-1].dur, ids[v2[i]-1].desc);
 }
 
 void ordena(int vec[], Tarefa ids[], int size){
@@ -409,7 +413,6 @@ void ordena(int vec[], Tarefa ids[], int size){
             }
         }
     }
-
     for(i=0; i < size; i++)
         printf("%d %d %s\n", vec[i], ids[vec[i]-1].timeexec, ids[vec[i]-1].desc);
 }
