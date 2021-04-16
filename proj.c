@@ -276,7 +276,7 @@ int comando_l(Tarefa ids[]){
         }
         ordena(ids_ord, ids, 0, tarefas-1, 0);
         for(i=0; i < tarefas; i++)
-            printf("%d %s #%d %s\n",ids_ord[i], ids[ids_ord[i]-1].atv, /
+            printf("%d %s #%d %s\n",ids_ord[i], ids[ids_ord[i]-1].atv,\
             ids[ids_ord[i]-1].dur, ids[ids_ord[i]-1].desc);
         return 0;
     }
@@ -388,7 +388,7 @@ int comando_d(Tarefa ids[]){
     ordena(ids_ativ, ids, 0, j-1, 1);
     /*output*/
     for(i=0; i < j; i++)
-        printf("%d %d %s\n", ids_ativ[i], ids[ids_ativ[i]-1].timeexec,/
+        printf("%d %d %s\n", ids_ativ[i], ids[ids_ativ[i]-1].timeexec,\
          ids[ids_ativ[i]-1].desc);
     
     return 0;
